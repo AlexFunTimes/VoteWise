@@ -2,9 +2,9 @@ package com.votewise.app.data.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.votewise.app.data.models.Candidate
+import com.votewise.app.data.models.CandidateEntity
 
-@Database(entities = [Candidate::class], version = 1)
+@Database(entities = [CandidateEntity::class], version = 1, exportSchema = false)  // Suppress warning
 abstract class AppDatabase : RoomDatabase() {
-    // DAOs
+    abstract fun candidateDao(): CandidateDao
 }
