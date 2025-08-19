@@ -1,16 +1,16 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
-    id("kotlin-kapt")
-    alias(libs.plugins.compose.compiler)
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("com.google.dagger.hilt.android")
+    id("androidx.room")
+    id("com.google.devtools.ksp")
+    id("com.google.android.gms.oss-licenses-plugin")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
-
 
 android {
     namespace = "com.votewise.app"
-    compileSdk = 36
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.votewise.app"
@@ -18,110 +18,75 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
+    kotlinOptions {
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
         buildConfig = true
     }
-
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.15"  // Updated for 2.2.0
     }
-    buildToolsVersion = "36.0.0"
+    room {
+        schemaDirectory = "$projectDir/schemas"  // Keeps schema export enabled
+    }
 }
 
 dependencies {
-    implementation(libs.kotlinx.coroutines.core)  // For StateFlow
-    // Material library for XML themes (resolves Theme.Material3.*)
-    implementation(libs.material)
+    // Kotlin stdlib updated
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.0")
 
-    implementation(libs.core.ktx)
-    implementation(libs.lifecycle.runtime.ktx)
-    implementation(libs.lifecycle.viewmodel.compose)
-    implementation(libs.activity.compose)
-    implementation(platform(libs.compose.bom))  // Updated BOM
-    implementation(libs.compose.ui)
-    implementation(libs.compose.ui.graphics)
-    implementation(libs.compose.ui.tooling.preview)
-    implementation(libs.compose.foundation)
-    implementation(libs.compose.material3)
-    implementation(libs.navigation.compose)
-    implementation(libs.androidx.glance.appwidget)
-    implementation(libs.androidx.glance.material3) // Optional
-    // implementation(libs.androidx.glance.appwidget.proto) // If needed
+    // Compose BOM
+    implementation(platform("androidx.compose:compose-bom:2025.05.00"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.activity:activity-compose:1.9.0")
+    implementation("androidx.navigation:navigation-compose:2.9.3")
+
+    // Retrofit/OkHttp (downgraded OkHttp to stable 5.0.0)
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:5.0.0")
+
+    // Room updated
+    implementation("androidx.room:room-runtime:2.7.2")
+    ksp("androidx.room:room-compiler:2.7.2")
+    implementation("androidx.room:room-ktx:2.7.2")
+    implementation("com.google.android.gms:play-services-oss-licenses:17.1.0")  // Runtime library for licenses screen
+
     // Hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    ksp("com.google.dagger:hilt-compiler:2.51.1")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
-    // Retrofit
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.gson)
-    implementation(libs.okhttp.logging)
+    // Coil Compose (3.3.0, group fixed in toml)
+    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
 
-    // Jetpack Compose
-    implementation(libs.compose.ui)
-    implementation(libs.compose.material3)
-    implementation(libs.compose.ui.tooling.preview)
-    implementation(libs.navigation.compose)
-    implementation(libs.activity.compose)
-
-    // Charts for donor visualizations
-    implementation(libs.mpandroidchart)
-
-    // Animations and utilities
-    implementation(libs.androidx.animation)
-    implementation(libs.coil.compose) // For image loading (candidate photos)
-
-    // Debugging
-    debugImplementation(libs.compose.ui.tooling)
-
-    // Room
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
-
-    // Charts
-    implementation(libs.mpandroidchart)
-
-    // AdMob
-    implementation(libs.admob)
-
-    // Play Billing
-    implementation(libs.play.billing)
-    implementation(libs.billing) // Latest as of 2025; handles subscriptions
-
-    // Testing
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.test.ext)
-    androidTestImplementation(libs.espresso.core)
-    androidTestImplementation(platform(libs.compose.bom))
-    androidTestImplementation(libs.compose.ui)
-    debugImplementation(libs.compose.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)  // Updated
+    // Other (unchanged/updated)
+    implementation("com.github.PhilJay:MPAndroidChart:3.1.0")
+    implementation("com.android.billingclient:billing-ktx:8.0.0")
+    implementation("com.google.android.gms:play-services-ads:24.5.0")
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
+    implementation("com.google.firebase:firebase-auth-ktx:23.0.0")
+    implementation("androidx.core:core-ktx:1.17.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.2")
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.3.0")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
 }

@@ -9,6 +9,12 @@ import com.votewise.app.ui.navigation.BottomNavBar
 fun ProfileScreen(navController: NavController) {
     Scaffold(bottomBar = { BottomNavBar(navController) }) { padding ->
         Text("Profile Settings", modifier = Modifier.padding(padding))
-        // Add X login, preferences
+
+    Button(onClick = {
+        val context = LocalContext.current
+        context.startActivity(Intent(context, OssLicensesMenuActivity::class.java))
+    }) {
+        Text("Open Source Licenses")
+    }
     }
 }
